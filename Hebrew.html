@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>אותיות בעברית!</title>
+  <title>אותיות בעברית</title>
   <style>
     body {
       font-family: 'Segoe UI', 'Arial', sans-serif;
@@ -40,10 +40,9 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      cursor: pointer;
     }
 
-    .letter-button {
+    button.letter-button {
       width: 90px;
       height: 90px;
       background-color: #4dd0e1;
@@ -53,19 +52,26 @@
       color: white;
       font-size: 2.5em;
       font-weight: bold;
+      border: none;
+      cursor: pointer;
       transition: background-color 0.3s, transform 0.2s;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      user-select: none;
     }
 
-    .letter-item:hover .letter-button {
+    button.letter-button:hover,
+    button.letter-button:focus {
       background-color: #26c6da;
       transform: scale(1.1);
+      outline: none;
     }
 
     .letter-image {
       width: 120px;
       height: 120px;
       margin-top: 10px;
+      pointer-events: none;
+      user-select: none;
     }
 
     #output {
@@ -102,8 +108,10 @@
       margin: 0 10px;
     }
 
-    .nav-arrow:hover:not(.disabled) {
+    .nav-arrow:hover:not(.disabled),
+    .nav-arrow:focus:not(.disabled) {
       background-color: #004d40;
+      outline: none;
     }
 
     .nav-arrow.disabled {
@@ -113,7 +121,7 @@
     }
 
     @media (max-width: 600px) {
-      .letter-button {
+      button.letter-button {
         width: 70px;
         height: 70px;
         line-height: 70px;
@@ -134,18 +142,18 @@
   </style>
 </head>
 <body>
-  <h1>🎲 אותיות בקופסה!</h1>
+  <h1>אותיות בעברית</h1>
 
   <div class="nav-arrow-container">
-    <span id="prevStageBtn" class="nav-arrow disabled" title="חזרה לאותיות הקודמות">‹</span>
-    <span id="nextStageBtn" class="nav-arrow" title="המשך לאותיות הבאות">›</span>
+    <button id="prevStageBtn" class="nav-arrow disabled" aria-label="חזרה לאותיות הקודמות">‹</button>
+    <button id="nextStageBtn" class="nav-arrow" aria-label="המשך לאותיות הבאות">›</button>
   </div>
 
-  <div class="letter-container" id="letterContainer">
+  <div class="letter-container" id="letterContainer" role="list">
     <!-- אותיות יטענו כאן דינמית -->
   </div>
 
-  <div id="output"></div>
+  <div id="output" aria-live="polite" role="region"></div>
 
   <footer>
     <p>נבנה באהבה לילדים לומדים 💙</p>
@@ -190,6 +198,17 @@
     const nextStageBtn = document.getElementById('nextStageBtn');
     const prevStageBtn = document.getElementById('prevStageBtn');
 
+    // אובייקט לאחסון אודיו שהוטענו מראש
+    const audioCache = {};
+
+    function preloadAudio() {
+      allLetters.forEach(({ letter }) => {
+        const audio = new Audio(`sounds/${letter}.mp3`);
+        audio.load();
+        audioCache[letter] = audio;
+      });
+    }
+
     function loadStage(stageNum) {
       letterContainer.innerHTML = '';
       output.textContent = '';
@@ -199,38 +218,72 @@
       const stageLetters = allLetters.slice(start, end);
 
       stageLetters.forEach(({ letter, img, alt, word }) => {
-        const div = document.createElement('div');
-        div.classList.add('letter-item');
-        div.onclick = () => playLetter(letter, word);
-        div.innerHTML = `
-          <div class="letter-button">${letter}</div>
-          <img src="images/${img}" alt="${alt}" class="letter-image" />
-        `;
-        letterContainer.appendChild(div);
+        const letterItem = document.createElement('div');
+        letterItem.className = 'letter-item';
+        letterItem.setAttribute('role', 'listitem');
+
+        const button = document.createElement('button');
+        button.className = 'letter-button';
+        button.type = 'button';
+        button.textContent = letter;
+        button.setAttribute('aria-label', `האות ${letter}`);
+
+        const image = document.createElement('img');
+        image.className = 'letter-image';
+        image.src = `images/${img}`;
+        image.alt = alt;
+        image.setAttribute('aria-hidden', 'true');
+
+        letterItem.appendChild(button);
+        letterItem.appendChild(image);
+        letterContainer.appendChild(letterItem);
       });
 
       // עדכון מצב כפתורי החצים
       if (stageNum <= 0) {
         prevStageBtn.classList.add('disabled');
+        prevStageBtn.setAttribute('aria-disabled', 'true');
         prevStageBtn.title = 'אין אותיות קודמות';
       } else {
         prevStageBtn.classList.remove('disabled');
+        prevStageBtn.removeAttribute('aria-disabled');
         prevStageBtn.title = 'חזרה לאותיות הקודמות';
       }
 
       if (stageNum >= maxStage) {
         nextStageBtn.classList.add('disabled');
+        nextStageBtn.setAttribute('aria-disabled', 'true');
         nextStageBtn.title = 'אין עוד אותיות';
       } else {
         nextStageBtn.classList.remove('disabled');
+        nextStageBtn.removeAttribute('aria-disabled');
         nextStageBtn.title = 'המשך לאותיות הבאות';
       }
     }
 
+    // מאזינים על כל לחיצות בתוך container – delegation
+    letterContainer.addEventListener('click', (e) => {
+      const btn = e.target.closest('button.letter-button');
+      if (!btn) return;
+
+      const letter = btn.textContent;
+      const found = allLetters.find(l => l.letter === letter);
+      if (!found) return;
+
+      playLetter(letter, found.word);
+    });
+
     function playLetter(letter, word) {
       output.textContent = `האות שנבחרה: ${letter} — לדוגמה: ${word}`;
-      const audio = new Audio(`sounds/${letter}.mp3`);
-      audio.play();
+      const audio = audioCache[letter];
+      if (audio) {
+        audio.pause();
+        audio.currentTime = 0;
+        audio.play().catch(() => {
+          // אפשר להוסיף טיפול בשגיאות כאן אם רוצים
+          console.warn(`לא הצליח להשמיע את הצליל של האות ${letter}`);
+        });
+      }
     }
 
     nextStageBtn.addEventListener('click', () => {
@@ -247,6 +300,7 @@
       }
     });
 
+    preloadAudio();
     loadStage(currentStage);
   </script>
 </body>
