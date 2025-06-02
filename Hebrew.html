@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>אותיות בעברית!</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', 'Arial', sans-serif;
+      background: linear-gradient(to bottom, #f7f7f7, #e0f7fa);
+      color: #222;
+      padding: 20px;
+      line-height: 1.6;
+      text-align: right;
+      margin: 0;
+    }
+
+    h1 {
+      color: #00796b;
+      font-size: 2.5em;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .letter-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      background-color: #ffffff;
+      border: 2px solid #b2dfdb;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      max-width: 700px;
+      margin: 0 auto 30px auto;
+    }
+
+    .letter-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .letter-button {
+      width: 90px;
+      height: 90px;
+      background-color: #4dd0e1;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 90px;
+      color: white;
+      font-size: 2.5em;
+      font-weight: bold;
+      transition: background-color 0.3s, transform 0.2s;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .letter-item:hover .letter-button {
+      background-color: #26c6da;
+      transform: scale(1.1);
+    }
+
+    .letter-image {
+      width: 120px;
+      height: 120px;
+      margin-top: 10px;
+    }
+
+    #output {
+      margin-top: 30px;
+      font-size: 1.4em;
+      color: #00695c;
+      text-align: center;
+      min-height: 2em;
+    }
+
+    footer {
+      margin-top: 50px;
+      font-size: 0.9em;
+      color: #666;
+      text-align: center;
+    }
+
+    .nav-arrow-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .nav-arrow {
+      cursor: pointer;
+      display: inline-block;
+      background-color: #00796b;
+      color: white;
+      font-size: 2.5em;
+      padding: 8px 18px;
+      border-radius: 50%;
+      user-select: none;
+      transition: background-color 0.3s;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      margin: 0 10px;
+    }
+
+    .nav-arrow:hover:not(.disabled) {
+      background-color: #004d40;
+    }
+
+    .nav-arrow.disabled {
+      background-color: #a7d5ce;
+      cursor: default;
+      pointer-events: none;
+    }
+
+    @media (max-width: 600px) {
+      .letter-button {
+        width: 70px;
+        height: 70px;
+        line-height: 70px;
+        font-size: 2em;
+      }
+
+      .letter-image {
+        width: 90px;
+        height: 90px;
+      }
+
+      .nav-arrow {
+        font-size: 2em;
+        padding: 6px 14px;
+        margin: 0 6px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>🎲 אותיות בקופסה!</h1>
+
+  <div class="nav-arrow-container">
+    <span id="prevStageBtn" class="nav-arrow disabled" title="חזרה לאותיות הקודמות">‹</span>
+    <span id="nextStageBtn" class="nav-arrow" title="המשך לאותיות הבאות">›</span>
+  </div>
+
+  <div class="letter-container" id="letterContainer">
+    <!-- אותיות יטענו כאן דינמית -->
+  </div>
+
+  <div id="output"></div>
+
+  <footer>
+    <p>נבנה באהבה לילדים לומדים 💙</p>
+  </footer>
+
+  <script>
+    const allLetters = [
+      { letter: 'א', img: 'lion.png', alt: 'אריה', word: 'אריה' },
+      { letter: 'ב', img: 'balloon.png', alt: 'בלון', word: 'בלון' },
+      { letter: 'ג', img: 'carrot.png', alt: 'גזר', word: 'גזר' },
+      { letter: 'ד', img: 'bear.png', alt: 'דוב', word: 'דוב' },
+      { letter: 'ה', img: 'mountain.png', alt: 'הר', word: 'הר' },
+
+      { letter: 'ו', img: 'frog.png', alt: 'צפרדע', word: 'צפרדע' },
+      { letter: 'ז', img: 'grape.png', alt: 'ענבים', word: 'ענבים' },
+      { letter: 'ח', img: 'hat.png', alt: 'כובע', word: 'כובע' },
+      { letter: 'ט', img: 'pumpkin.png', alt: 'דלעת', word: 'דלעת' },
+      { letter: 'י', img: 'duck.png', alt: 'ברווז', word: 'ברווז' },
+
+      { letter: 'כ', img: 'cat.png', alt: 'חתול', word: 'חתול' },
+      { letter: 'ל', img: 'heart.png', alt: 'לב', word: 'לב' },
+      { letter: 'מ', img: 'sun.png', alt: 'שמש', word: 'שמש' },
+      { letter: 'נ', img: 'fish.png', alt: 'דג', word: 'דג' },
+      { letter: 'ס', img: 'flower.png', alt: 'פרח', word: 'פרח' },
+
+      { letter: 'ע', img: 'camel.png', alt: 'גמל', word: 'גמל' },
+      { letter: 'פ', img: 'flower2.png', alt: 'פרח', word: 'פרח' },
+      { letter: 'צ', img: 'rabbit.png', alt: 'ארנב', word: 'ארנב' },
+      { letter: 'ק', img: 'house.png', alt: 'בית', word: 'בית' },
+      { letter: 'ר', img: 'book.png', alt: 'ספר', word: 'ספר' },
+
+      { letter: 'ש', img: 'tree.png', alt: 'עץ', word: 'עץ' },
+      { letter: 'ת', img: 'car.png', alt: 'מכונית', word: 'מכונית' },
+    ];
+
+    const lettersPerStage = 5;
+    let currentStage = 0;
+    const maxStage = Math.ceil(allLetters.length / lettersPerStage) - 1;
+
+    const letterContainer = document.getElementById('letterContainer');
+    const output = document.getElementById('output');
+    const nextStageBtn = document.getElementById('nextStageBtn');
+    const prevStageBtn = document.getElementById('prevStageBtn');
+
+    function loadStage(stageNum) {
+      letterContainer.innerHTML = '';
+      output.textContent = '';
+
+      const start = stageNum * lettersPerStage;
+      const end = start + lettersPerStage;
+      const stageLetters = allLetters.slice(start, end);
+
+      stageLetters.forEach(({ letter, img, alt, word }) => {
+        const div = document.createElement('div');
+        div.classList.add('letter-item');
+        div.onclick = () => playLetter(letter, word);
+        div.innerHTML = `
+          <div class="letter-button">${letter}</div>
+          <img src="images/${img}" alt="${alt}" class="letter-image" />
+        `;
+        letterContainer.appendChild(div);
+      });
+
+      // עדכון מצב כפתורי החצים
+      if (stageNum <= 0) {
+        prevStageBtn.classList.add('disabled');
+        prevStageBtn.title = 'אין אותיות קודמות';
+      } else {
+        prevStageBtn.classList.remove('disabled');
+        prevStageBtn.title = 'חזרה לאותיות הקודמות';
+      }
+
+      if (stageNum >= maxStage) {
+        nextStageBtn.classList.add('disabled');
+        nextStageBtn.title = 'אין עוד אותיות';
+      } else {
+        nextStageBtn.classList.remove('disabled');
+        nextStageBtn.title = 'המשך לאותיות הבאות';
+      }
+    }
+
+    function playLetter(letter, word) {
+      output.textContent = `האות שנבחרה: ${letter} — לדוגמה: ${word}`;
+      const audio = new Audio(`sounds/${letter}.mp3`);
+      audio.play();
+    }
+
+    nextStageBtn.addEventListener('click', () => {
+      if (currentStage < maxStage) {
+        currentStage++;
+        loadStage(currentStage);
+      }
+    });
+
+    prevStageBtn.addEventListener('click', () => {
+      if (currentStage > 0) {
+        currentStage--;
+        loadStage(currentStage);
+      }
+    });
+
+    loadStage(currentStage);
+  </script>
+</body>
+</html>
